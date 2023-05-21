@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:${PGv}
+    container_name: foodways_api
+    ports:
+      - ${PGPORT}
+    volumes:
+      - foodways-store:/var/lib/postgresql/data/pgdata
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: ${PGDATA}
+    restart: always
+volumes:
+  foodways-store:
+    driver: local

@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class users extends Model {
     /**
@@ -10,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here 
+      // define association here
       // users.hasOne(models.resto, {
       //   as: 'resto',
       //   foreignKey: {
@@ -18,32 +16,34 @@ module.exports = (sequelize, DataTypes) => {
       //   }
       // })
       users.hasMany(models.products, {
-        as: 'products',
+        as: "products",
         foreignKey: {
-          name: 'id'
-        }
-      })
-      users.hasOne(models.resto, {
-        as: 'restos',
+          name: "id",
+        },
+      });
+      users.hasOne(models.restos, {
+        as: "restos",
         foreignKey: {
-          name: 'ownerId'
-        }
-      })
+          name: "ownerId",
+        },
+      });
     }
-  };
-  users.init({
-    fullname: DataTypes.STRING,
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
-    phone: DataTypes.STRING,
-    location: DataTypes.STRING,
-    image: DataTypes.STRING,
-    role: DataTypes.STRING,
-    gender: DataTypes.STRING,
-    
-  }, {
-    sequelize,
-    modelName: 'users',
-  });
+  }
+  users.init(
+    {
+      fullname: DataTypes.STRING,
+      email: DataTypes.STRING,
+      password: DataTypes.STRING,
+      phone: DataTypes.STRING,
+      location: DataTypes.STRING,
+      image: DataTypes.STRING,
+      role: DataTypes.STRING,
+      gender: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "users",
+    }
+  );
   return users;
 };
