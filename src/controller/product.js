@@ -273,14 +273,14 @@ exports.editProduct = async (req, res) => {
       where: { id },
     });
     const fs = require("fs");
-    const path = `./uploads/img/${productData.img}`;
+    const pathImg = `./uploads/img/${productData.img}`;
 
     if (
       req.file?.filename !== undefined &&
       req.file.filename !== productData.img
     ) {
       try {
-        fs.unlinkSync(path);
+        fs.unlinkSync(pathImg);
       } catch (error) {
         console.error(error);
       }
