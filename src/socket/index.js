@@ -61,7 +61,7 @@ const socketIo = (io) => {
           ],
           order: [["createdAt", "DESC"]],
         });
-        // console.log(data)
+
         socket.emit("transaction", data);
       } catch (err) {
         console.log(err.message);

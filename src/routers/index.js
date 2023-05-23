@@ -36,6 +36,7 @@ const {
   addProduct,
   getProducts,
   getProductsAll,
+  getProductsRand10,
   getProduct,
   editProduct,
   deleteProduct,
@@ -44,8 +45,15 @@ const {
 router.post("/add/product/", userCheck, owner, uploadImg("image"), addProduct);
 router.get("/products", userCheck, owner, getProducts);
 router.get("/products/all", getProductsAll);
+router.get("/products/random", getProductsRand10);
 router.get("/product/:id", userCheck, owner, getProduct);
-router.patch("/product/:id", userCheck, owner, editProduct);
+router.patch(
+  "/product/:id",
+  userCheck,
+  owner,
+  uploadImg("image", true),
+  editProduct
+);
 router.delete("/product/:id", userCheck, owner, deleteProduct);
 
 // resto
@@ -65,7 +73,7 @@ router.get("/resto/:id", getRestoId);
 router.get("/resto/user/:id", getRestoUser);
 router.get("/restos", getRestos);
 router.get("/resto", userCheck, owner, getResto);
-router.patch("/resto", userCheck, owner, editResto);
+router.patch("/resto", userCheck, owner, uploadImg("img", true), editResto);
 router.delete("/resto", userCheck, owner, deleteResto);
 
 // transaction

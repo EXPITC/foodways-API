@@ -9,6 +9,7 @@ lerna-debug.log*
 
 # testing
 /coverage
+/uploads/img/*
 
 # production
 /build

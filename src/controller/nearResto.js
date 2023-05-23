@@ -1,3 +1,4 @@
+"use strict";
 const { restos, products, users } = require("../../models");
 require("dotenv").config();
 
@@ -67,22 +68,33 @@ exports.nearResto = async (req, res) => {
 
     nearest = await Promise.all(
       nearest.map(async (data) => {
-        const endLoc = data.resto.loc.split(" ");
-        // endLoc = [parseFloat(loc[0]), parseFloat(loc[1])];
+        const restoLoc = data?.resto?.loc.split(" ");
 
+        // Get resto menu
         const menu = await getMenu(data.resto.ownerId);
-        const direction_api = `https://api.mapbox.com/directions/v5/mapbox/driving/${userLoc[1]}%2C${userLoc[0]}%3B${endLoc[1]}%2C${endLoc[0]}?alternatives=false&exclude=toll%2Cferry%2Cunpaved%2Ccash_only_tolls&geometries=geojson&language=en&overview=full&steps=true&access_token=${process.env.MAPBOX_TOKEN}`;
+
+        // Get distance from user
+        const direction_api = `https://api.mapbox.com/directions/v5/mapbox/driving/${userLoc[1]}%2C${userLoc[0]}%3B${restoLoc[1]}%2C${restoLoc[0]}?alternatives=false&exclude=toll%2Cferry%2Cunpaved%2Ccash_only_tolls&geometries=geojson&language=en&overview=full&steps=true&access_token=${process.env.MAPBOX_TOKEN}`;
         let response = await fetch(direction_api);
         response = await response.json();
+
         let distance = response.routes[0].distance;
         const km = 0.001;
         distance = (distance * km).toFixed(3).toString().replace(".", ",");
+
+        // Get address resto
+        const api_address = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${restoLoc[0]}&lon=${restoLoc[1]}`;
+        response = await fetch(api_address);
+        response = await response.json();
+
+        const address = response.address.road;
 
         return {
           ...data,
           resto: { ...data.resto, img: pathImg + data.resto.img },
           menu,
           distance,
+          address,
         };
       })
     );

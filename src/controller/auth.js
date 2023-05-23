@@ -1,9 +1,10 @@
-const { users } = require("../../models");
+const { users, restos } = require("../../models");
 require("dotenv").config();
 
 const joi = require("joi");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { deleteUser } = require("./user");
 const path = "http://localhost:5001/img/";
 
 exports.register = async (req, res) => {
@@ -50,18 +51,15 @@ exports.register = async (req, res) => {
       image: "LOFI.jpg",
     });
 
-    console.log("HIT");
     const isCreated = await users.findOne({
       where: { email },
     });
-    console.log("hit");
     const userData = {
       id: isCreated?.id,
       status: isCreated?.role,
     };
     const { role, id, location, phone, image } = isCreated;
     const token = jwt.sign(userData, process.env.JWT_TOKEN);
-    console.log("This is id", id);
 
     res.status(200).send({
       status: "success",
@@ -79,7 +77,6 @@ exports.register = async (req, res) => {
         },
       },
     });
-    console.log("Heyyyy!!!");
   } catch (err) {
     res.status(500).send({
       status: "failed",
@@ -102,41 +99,55 @@ exports.login = async (req, res) => {
 
   try {
     const { email, password } = req.body;
-    const userAcc = await users.findOne({
-      where: { email: email.toLowerCase() },
+    let userAcc = await users.findOne({
+      where: {
+        email: email.toLowerCase(),
+      },
+      attributes: {
+        exclude: ["createdAt", "updatedAt"],
+      },
+      include: {
+        model: restos,
+        as: "restos",
+        attributes: {
+          exclude: ["createdAt", "updatedAt", "ownerId", "id"],
+        },
+      },
     });
+    const sendErr = () => {
+      return res.status(400).send({
+        status: "failed",
+        message: "email or password wrong",
+      });
+    };
 
-    if (!userAcc) {
-      return res.status(400).send({
-        status: "failed",
-        message: "email or password wrong",
-      });
-    }
+    if (!userAcc) return sendErr();
+    userAcc = JSON.parse(JSON.stringify(userAcc));
     const valid = await bcrypt.compare(password, userAcc.password);
-    if (!valid) {
-      return res.status(400).send({
-        status: "failed",
-        message: "email or password wrong",
-      });
-    }
-    const { id, fullname, role, location, phone, image } = userAcc;
+    if (!valid) return sendErr();
+
     const userData = {
-      id,
+      id: userAcc.id,
       status: userAcc.role,
     };
 
     const token = jwt.sign(userData, process.env.JWT_TOKEN);
 
+    let resto = userAcc?.restos;
+    if (resto) {
+      resto = {
+        ...resto,
+        img: path + userAcc?.restos.img,
+      };
+    }
+    delete userAcc.password;
+
     res.status(200).send({
       status: "login",
-      id,
-      role,
-      fullname,
-      email,
       token,
-      location,
-      phone,
-      image: path + image,
+      ...userAcc,
+      image: path + userAcc.image,
+      resto,
     });
   } catch (err) {
     res.status(409).send({
@@ -149,27 +160,53 @@ exports.login = async (req, res) => {
 exports.auth = async (req, res) => {
   try {
     const { id } = req.user;
-    const userAcc = await users.findOne({
+    let userAcc = await users.findOne({
       where: { id },
+      attributes: {
+        exclude: ["createdAt", "updatedAt"],
+      },
+      include: {
+        model: restos,
+        as: "restos",
+        attributes: {
+          exclude: ["createdAt", "updatedAt", "ownerId"],
+        },
+      },
     });
-    const { fullname, role, email, location, phone, image } = userAcc;
+    const sendErr = () => {
+      return res.status(400).send({
+        status: "failed",
+        message: "invalid login",
+      });
+    };
+
+    if (!userAcc) return sendErr();
+
+    userAcc = JSON.parse(JSON.stringify(userAcc));
+
     const userData = {
-      id,
+      id: userAcc.id,
       status: userAcc.role,
     };
 
     const token = jwt.sign(userData, process.env.JWT_TOKEN);
 
+    let resto = userAcc?.restos;
+    if (resto) {
+      resto = {
+        ...resto,
+        img: path + userAcc?.restos.img,
+      };
+    }
+    delete userAcc.password;
+    delete userAcc.restos;
+
     res.status(200).send({
       status: "login",
-      id,
-      role,
-      fullname,
-      email,
       token,
-      location,
-      phone,
-      image: path + image,
+      ...userAcc,
+      image: path + userAcc.image,
+      resto,
     });
   } catch (err) {
     res.status(500).send({

@@ -1,11 +1,11 @@
 const multer = require("multer");
 
-exports.uploadImg = (image) => {
+exports.uploadImg = (image, pass) => {
   const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: (_req, _file, cb) => {
       cb(null, "uploads/img");
     },
-    filename: (req, file, cb) => {
+    filename: (_req, file, cb) => {
       cb(null, Date.now() + "-" + file.originalname.replace(/\s/g, ""));
     },
   });
@@ -38,6 +38,7 @@ exports.uploadImg = (image) => {
       }
 
       if (!req.file && !err) {
+        if (pass) return next();
         return res.status(400).send({
           message: "please select the file",
         });

@@ -1,4 +1,5 @@
 const { restos, users, products } = require("../../models");
+const resto = require("../../models/resto");
 
 exports.addResto = async (req, res) => {
   try {
@@ -259,18 +260,10 @@ exports.deleteResto = async (req, res) => {
 exports.editResto = async (req, res) => {
   try {
     const id = req.user.id;
+
     const restoData = await restos.findOne({
       where: { ownerId: id },
     });
-    const fs = require("fs");
-    const path = `./uploads/img/${restoData.img}`;
-    if (req.body?.img != restoData.img) {
-      try {
-        fs.unlinkSync(path);
-      } catch (error) {
-        console.log(error);
-      }
-    }
     if (!restoData) {
       return res.status(400).send({
         status: "fail",
@@ -281,7 +274,28 @@ exports.editResto = async (req, res) => {
       });
     }
 
-    const data = req.body;
+    let data = req.body;
+
+    const fs = require("fs");
+    const path = `./uploads/img/${restoData.img}`;
+
+    if (
+      req.file?.filename !== undefined &&
+      req.file?.filename !== restoData.img
+    ) {
+      try {
+        fs.unlinkSync(path);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    if (req?.file?.filename) {
+      data = {
+        ...data,
+        img: req.file.filename,
+      };
+    }
+
     await restos.update(data, {
       where: { ownerId: id },
     });
