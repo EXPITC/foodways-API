@@ -10,6 +10,11 @@ const Sequelize = new S(
   {
     host: process.env.HOST,
     dialect: "postgresql",
+    dialectOptions: {
+      ssl: {
+        require: true,
+      },
+    },
     logging: console.log,
     freezeTableName: true,
     pool: {
