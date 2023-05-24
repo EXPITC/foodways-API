@@ -6,7 +6,6 @@ exports.nearResto = async (req, res) => {
   try {
     const data = req.body;
     const { id } = req.user;
-    const pathImg = "http://localhost:5001/img/";
 
     const user = await users.findOne({
       where: { id },
@@ -36,10 +35,7 @@ exports.nearResto = async (req, res) => {
 
       menu = menu.map((product) => product.dataValues);
 
-      return menu.map((product) => ({
-        ...product,
-        img: pathImg + product.img,
-      }));
+      return menu;
     }
 
     const nearRestoScore = [];
@@ -91,7 +87,6 @@ exports.nearResto = async (req, res) => {
 
         return {
           ...data,
-          resto: { ...data.resto, img: pathImg + data.resto.img },
           menu,
           distance,
           address,

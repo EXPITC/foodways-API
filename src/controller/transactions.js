@@ -249,29 +249,30 @@ exports.getTransactionIdle = async (req, res) => {
         exclude: ["createdAt", "updatedAt"],
       },
     });
-    const path = "http://localhost:5001/img/";
-    data = JSON.parse(JSON.stringify(data));
-    let product = data.map((x) => {
-      return {
-        product: x.product.map((x) => {
-          return {
-            ...x,
-            img: path + x.img,
-          };
-        }),
-      };
-    });
-    product = product[0].product.map((x) => {
-      return {
-        ...x,
-      };
-    });
-    data = data.map((x) => {
-      return {
-        ...x,
-        product,
-      };
-    });
+    // const path = "http://localhost:5001/img/";
+    // data = JSON.parse(JSON.stringify(data));
+    // let product = data.map((x) => {
+    //   return {
+    //     product: x.product.map((x) => {
+    //       return {
+    //         ...x,
+    //         img: path + x.img,
+    //       };
+    //     }),
+    //   };
+    // });
+    // product = product[0].product.map((x) => {
+    //   return {
+    //     ...x,
+    //   };
+    // });
+    // data = data.map((x) => {
+    //   return {
+    //     ...x,
+    //     product,
+    //   };
+    // });
+
     res.status(200).send({
       message: "Success",
       data: {

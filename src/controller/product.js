@@ -1,7 +1,8 @@
 const { Sequelize } = require("sequelize");
 const { products, users, restos } = require("../../models");
 const db = require("../database/connection");
-const path = "http://localhost:5001/img/";
+const { cloudinary } = require("../middleware/couldinary");
+const { deleteImg } = require("../utils/cloudinary/deleteImg");
 
 exports.getProducts = async (req, res) => {
   try {
@@ -22,13 +23,6 @@ exports.getProducts = async (req, res) => {
       },
     });
 
-    data = JSON.parse(JSON.stringify(data));
-    data = data.map((product) => {
-      return {
-        ...product,
-        img: path + product.img,
-      };
-    });
     res.status(200).send({
       status: "success",
       data: {
@@ -125,11 +119,9 @@ exports.getProductsRand10 = async (_req, res) => {
 
         return {
           ...product,
-          img: path + product.img,
           seller: {
             restos: {
               ...product.seller.restos,
-              img: path + product.seller.restos.img,
               address,
             },
           },
@@ -177,12 +169,10 @@ exports.getProduct = async (req, res) => {
         message: "product details not found",
       });
     }
-    data = JSON.parse(JSON.stringify(data));
 
     res.status(200).send({
       status: "success",
       ...data,
-      img: path + data.img,
     });
   } catch (err) {
     res.status(409).send({
@@ -195,9 +185,10 @@ exports.getProduct = async (req, res) => {
 exports.addProduct = async (req, res) => {
   try {
     const data = req.body;
+
     const response = await products.create({
       ...data,
-      img: req.file.filename,
+      img: req.uploadImg.url,
       sellerId: req.user.id,
     });
 
@@ -241,17 +232,16 @@ exports.deleteProduct = async (req, res) => {
       });
     }
 
-    const fs = require("fs");
-    const path = `./uploads/img/${productData.img}`;
+    await products.destroy({
+      where: { id },
+    });
+
     try {
-      fs.unlinkSync(path);
+      await deleteImg(productData.img);
     } catch (error) {
       console.error(error);
     }
 
-    await products.destroy({
-      where: { id },
-    });
     res.send({
       status: "success",
       message: "product successfully destroy",
@@ -272,24 +262,16 @@ exports.editProduct = async (req, res) => {
     const productData = await products.findOne({
       where: { id },
     });
-    const fs = require("fs");
-    const pathImg = `./uploads/img/${productData.img}`;
 
-    if (
+    const isNewImage =
       req.file?.filename !== undefined &&
-      req.file.filename !== productData.img
-    ) {
-      try {
-        fs.unlinkSync(pathImg);
-      } catch (error) {
-        console.error(error);
-      }
-    }
+      req?.uploadImg?.url !== undefined &&
+      req.uploadImg.url !== productData.img;
 
-    if (req?.file?.filename) {
+    if (isNewImage) {
       data = {
         ...data,
-        img: req.file.filename,
+        img: req.uploadImg.url,
       };
     }
 
@@ -299,6 +281,14 @@ exports.editProduct = async (req, res) => {
         sellerId: sellerId,
       },
     });
+
+    if (isNewImage) {
+      try {
+        await deleteImg(req.uploadImg.url);
+      } catch (error) {
+        console.error(error);
+      }
+    }
 
     res.send({
       status: "success",

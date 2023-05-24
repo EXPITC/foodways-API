@@ -1,6 +1,5 @@
 const { users, restos, products } = require("../../models");
-// const  = require('../../models/products');
-// const { and } = require('sequelize/dist/lib/operators');
+const { deleteImg } = require("../utils/cloudinary/deleteImg");
 
 exports.addUser = async (req, res) => {
   try {
@@ -34,14 +33,7 @@ exports.getUsers = async function (_req, res) {
         exclude: ["password", "createdAt", "updatedAt"],
       },
     });
-    const path = "http://localhost:5001/img/";
-    usersData = JSON.parse(JSON.stringify(usersData));
-    usersData = usersData.map((x) => {
-      return {
-        ...x,
-        image: path + x.img,
-      };
-    });
+
     res.status(200).send({
       status: "success",
       massage: "users successfully retrieved",
@@ -99,7 +91,7 @@ exports.profileMe = async (req, res) => {
       },
       where: { id },
     });
-    userData
+    userData?.id
       ? res.status(200).send({
           status: "success",
           message: "user successfully retrieved",
@@ -125,37 +117,35 @@ exports.updateUser = async (req, res) => {
   try {
     // console.log("update user hit");
     const { id } = req.user;
-    const data = req.body;
-    console.log(data);
-    const img = await users.findOne({
+    let data = req.body;
+
+    const user = await users.findOne({
       where: { id },
     });
-    // console.log(id);
-    // console.log(img);
-    const fs = require("fs");
-    const path = `./uploads/img/${img.image}`;
-    const isNewImage = req.body?.image != img.image;
+
+    const isNewImage =
+      req.file?.filename !== undefined &&
+      req?.uploadImg?.url !== undefined &&
+      req.uploadImg.url !== user.img;
 
     if (isNewImage) {
-      // delete & replace local photo
+      data = {
+        ...data,
+        img: req.uploadImg.url,
+      };
+    }
+
+    await users.update(data, {
+      where: { id },
+    });
+
+    if (isNewImage) {
       try {
-        if (img.image != "LOFI.jpg") {
-          fs.unlinkSync(path);
-        }
+        await deleteImg(user.img);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
-    console.log("Heyy", req.file.filename);
-    await users.update(
-      {
-        ...data,
-        image: req.file.filename,
-      },
-      {
-        where: { id },
-      }
-    );
 
     res.send({
       status: "success",

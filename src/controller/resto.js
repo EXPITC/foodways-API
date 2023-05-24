@@ -1,5 +1,6 @@
 const { restos, users, products } = require("../../models");
 const resto = require("../../models/resto");
+const { deleteImg } = require("../utils/cloudinary/deleteImg");
 
 exports.addResto = async (req, res) => {
   try {
@@ -22,7 +23,7 @@ exports.addResto = async (req, res) => {
 
     const response = await restos.create({
       ...data,
-      img: req.file.filename,
+      img: req.uploadImg.url,
       ownerId: id,
     });
 
@@ -45,7 +46,6 @@ exports.addResto = async (req, res) => {
 
 exports.getRestos = async (req, res) => {
   try {
-    const path = "http://localhost:5001/img/";
     let data = await restos.findAll({
       include: {
         model: users,
@@ -59,13 +59,6 @@ exports.getRestos = async (req, res) => {
       },
     });
 
-    data = JSON.parse(JSON.stringify(data));
-    data = data.map((x) => {
-      return {
-        ...x,
-        img: path + x.img,
-      };
-    });
     res.send({
       message: "success",
       data: {
@@ -105,20 +98,13 @@ exports.getRestoId = async (req, res) => {
       });
     }
 
-    let menu = await products.findAll({
+    const menu = await products.findAll({
       where: { sellerId: data.ownerId },
       attributes: {
         exclude: ["createdAt", "updatedAt"],
       },
     });
-    const path = "http://localhost:5001/img/";
-    menu = JSON.parse(JSON.stringify(menu));
-    menu = menu.map((x) => {
-      return {
-        ...x,
-        img: path + x.img,
-      };
-    });
+
     res.send({
       message: "success",
       data: {
@@ -276,29 +262,29 @@ exports.editResto = async (req, res) => {
 
     let data = req.body;
 
-    const fs = require("fs");
-    const path = `./uploads/img/${restoData.img}`;
-
-    if (
+    const isNewImage =
       req.file?.filename !== undefined &&
-      req.file?.filename !== restoData.img
-    ) {
-      try {
-        fs.unlinkSync(path);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    if (req?.file?.filename) {
+      req?.uploadImg?.url !== undefined &&
+      req.uploadImg.url !== restoData.img;
+
+    if (isNewImage) {
       data = {
         ...data,
-        img: req.file.filename,
+        img: req.uploadImg.url,
       };
     }
 
     await restos.update(data, {
       where: { ownerId: id },
     });
+
+    if (isNewImage) {
+      try {
+        await deleteImg(restoData.img);
+      } catch (error) {
+        console.log(error);
+      }
+    }
     res.send({
       status: "success",
       message: "resto successfully update",

@@ -64,7 +64,7 @@ const socketIo = (io) => {
 
         socket.emit("transaction", data);
       } catch (err) {
-        console.log(err.message);
+        console.error(err.message);
       }
     });
 
@@ -80,7 +80,7 @@ const socketIo = (io) => {
         );
         socket.emit("OrderData", data);
       } catch (err) {
-        console.log(err.message);
+        console.error(err.message);
       }
     });
 
@@ -143,7 +143,7 @@ const socketIo = (io) => {
         );
         socket.emit("ConfirmData", data);
       } catch (err) {
-        console.log(err.massage);
+        console.error(err.massage);
       }
     });
     socket.on("cancel", async (transId) => {
@@ -157,7 +157,7 @@ const socketIo = (io) => {
         );
         socket.emit("cancelData", data);
       } catch (err) {
-        console.log(err.massage);
+        console.error(err.massage);
       }
     });
     socket.on("accept", async (transId) => {
@@ -178,7 +178,7 @@ const socketIo = (io) => {
 
         socket.emit("acceptData", data);
       } catch (err) {
-        console.log(err.massage);
+        console.error(err.massage);
       }
     });
     socket.on("transactions", async (_payload) => {
@@ -216,7 +216,7 @@ const socketIo = (io) => {
         });
         socket.emit("transactionsData", data);
       } catch (err) {
-        console.log(err.message);
+        console.error(err.message);
       }
     });
     socket.on("onTheWay", async (userId) => {
@@ -235,7 +235,7 @@ const socketIo = (io) => {
         console.log(data);
         socket.emit("otwData", data);
       } catch (err) {
-        console.log(err.massage);
+        console.error(err.massage);
       }
     });
     socket.on("disconnect", () => {

@@ -4,8 +4,7 @@ require("dotenv").config();
 const joi = require("joi");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { deleteUser } = require("./user");
-const path = "http://localhost:5001/img/";
+// const { deleteUser } = require("./user");
 
 exports.register = async (req, res) => {
   const schema = joi.object({
@@ -40,7 +39,7 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(8);
     const hashPass = await bcrypt.hash(req.body.password, salt);
 
-    const response = await users.create({
+    await users.create({
       fullname: req.body.fullname,
       email: email.toLowerCase(),
       password: hashPass,
@@ -48,17 +47,27 @@ exports.register = async (req, res) => {
       gender: req.body.gender,
       phone: req.body.phone,
       location: req.body.location,
-      image: "LOFI.jpg",
+      image: process.env.DEFAULT_PROFILE_URL,
     });
 
-    const isCreated = await users.findOne({
+    const user = await users.findOne({
       where: { email },
+      attributes: {
+        exclude: ["gender", "password", "createdAt", "updatedAt"],
+      },
     });
+
+    if (!user?.id)
+      return res.status(201).send({
+        status: "failed",
+        message: "acc fail to create",
+      });
+
     const userData = {
-      id: isCreated?.id,
-      status: isCreated?.role,
+      id: user?.id,
+      status: user?.role,
     };
-    const { role, id, location, phone, image } = isCreated;
+
     const token = jwt.sign(userData, process.env.JWT_TOKEN);
 
     res.status(200).send({
@@ -66,14 +75,8 @@ exports.register = async (req, res) => {
       message: "successfully register",
       data: {
         user: {
-          fullname: response.fullname,
-          email: email.toLowerCase(),
-          id,
-          role,
+          ...user,
           token,
-          location,
-          phone,
-          image: path + image,
         },
       },
     });
@@ -134,19 +137,13 @@ exports.login = async (req, res) => {
     const token = jwt.sign(userData, process.env.JWT_TOKEN);
 
     let resto = userAcc?.restos;
-    if (resto) {
-      resto = {
-        ...resto,
-        img: path + userAcc?.restos.img,
-      };
-    }
+
     delete userAcc.password;
 
     res.status(200).send({
       status: "login",
       token,
       ...userAcc,
-      image: path + userAcc.image,
       resto,
     });
   } catch (err) {
@@ -191,13 +188,8 @@ exports.auth = async (req, res) => {
 
     const token = jwt.sign(userData, process.env.JWT_TOKEN);
 
-    let resto = userAcc?.restos;
-    if (resto) {
-      resto = {
-        ...resto,
-        img: path + userAcc?.restos.img,
-      };
-    }
+    const resto = userAcc?.restos;
+
     delete userAcc.password;
     delete userAcc.restos;
 
@@ -205,7 +197,6 @@ exports.auth = async (req, res) => {
       status: "login",
       token,
       ...userAcc,
-      image: path + userAcc.image,
       resto,
     });
   } catch (err) {
