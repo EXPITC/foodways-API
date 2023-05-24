@@ -19,7 +19,12 @@ const io = new Server(server, {
 require("./src/socket")(io);
 
 app.use(express.json());
-app.use(cors());
+
+const corsConf = {
+  origin: process.env.FE_ORIGIN,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+};
+app.use(cors(corsConf));
 
 app.use("/img", express.static("./uploads/img"));
 app.use("/api/v1/", router);
