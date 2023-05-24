@@ -12,6 +12,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.FE_ORIGIN,
+    credentials: true,
     methods: ["GET", "POST"],
   },
 });
@@ -22,7 +23,9 @@ app.use(express.json());
 
 const corsConf = {
   origin: process.env.FE_ORIGIN,
+  credentials: true,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  optionsSuccessStatus: 200,
 };
 app.use(cors(corsConf));
 
