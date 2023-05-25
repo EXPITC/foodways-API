@@ -28,9 +28,10 @@ const corsConf = {
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsConf));
+app.options("*", cors(corsConf));
 
-app.use("/img", express.static("./uploads/img"));
-app.use("/api/v1/", router);
+// app.use("/img", express.static("./uploads/img"));
+app.use("/api/v1/", cors(corsConf), router);
 server.listen(port, () => {
   console.info(`listen  ${server.address().address}${port}`);
 });
