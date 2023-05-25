@@ -26,12 +26,13 @@ const corsConf = {
   credentials: true,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
 };
 app.use(cors(corsConf));
 app.options("*", cors(corsConf));
 
 // app.use("/img", express.static("./uploads/img"));
-app.use("/api/v1/", cors(corsConf), router);
+app.use("/api/v1/", router);
 server.listen(port, () => {
   console.info(`listen  ${server.address().address}${port}`);
 });
