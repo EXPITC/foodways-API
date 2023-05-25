@@ -44,9 +44,9 @@ exports.addResto = async (req, res) => {
   }
 };
 
-exports.getRestos = async (req, res) => {
+exports.getRestos = async (_req, res) => {
   try {
-    let data = await restos.findAll({
+    const data = await restos.findAll({
       include: {
         model: users,
         as: "owner",
@@ -59,6 +59,8 @@ exports.getRestos = async (req, res) => {
       },
     });
 
+    if (!data) throw Error({ message: "resto cant be found." });
+
     res.send({
       message: "success",
       data: {
@@ -66,7 +68,7 @@ exports.getRestos = async (req, res) => {
       },
     });
   } catch (e) {
-    res.status(409).send({
+    res.status(500).send({
       status: "failed",
       message: "server error: " + e.message,
     });
