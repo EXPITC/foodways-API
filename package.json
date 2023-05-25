@@ -8,6 +8,7 @@
     "spin": "node index.js",
     "client": "npm start --prefix ../foodways",
     "dev": "concurrently \"npm start\" \"npm run client\" "
+    "vercel-build": "npx sequelize-cli db:migrate --env production"
   },
   "author": "tc",
   "license": "ISC",
