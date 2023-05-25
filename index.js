@@ -25,9 +25,20 @@ const corsConf = {
   origin: process.env.FE_ORIGIN,
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+  methods: ["GET", "OPTIONS", "PATCH", "DELETE", "POST", "PUT"],
+  allowedHeaders: [
+    "X-CSRF-Token",
+    "X-Requested-With",
+    "Accept",
+    "Accept-Version",
+    "Content-Length",
+    "Content-MD5",
+    "Content-Type",
+    "Date",
+    "X-Api-Version",
+  ],
 };
-app.use(cors(corsConf));
+app.use(cors({}));
 app.options("*", cors(corsConf));
 
 // app.use("/img", express.static("./uploads/img"));
