@@ -1,5 +1,5 @@
 const { transactions, users, products, order, resto } = require("../../models");
-const Op = require("Sequelize").Op;
+const Op = require("sequelize").Op;
 exports.addTransaction = async (req, res) => {
   try {
     const thenTransaction = await transactions.findOne({
