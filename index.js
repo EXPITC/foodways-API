@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const port = process.env.EXPRESS_PORT;
+const port = process.env.EXPRESS_PORT || 5000;
 const router = require("./src/routers");
 
 const cors = require("cors");
@@ -24,7 +24,6 @@ app.use(express.json());
 const corsConf = {
   origin: process.env.FE_ORIGIN,
   credentials: true,
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
 };
