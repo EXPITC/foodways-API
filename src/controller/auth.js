@@ -29,7 +29,7 @@ exports.register = async (req, res) => {
       where: { email },
     });
 
-    if (isUser?.id) {
+    if (isUser) {
       return res.status(201).send({
         status: "failed",
         message: "acc already exists",
