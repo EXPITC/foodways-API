@@ -1,7 +1,6 @@
 const { Sequelize } = require("sequelize");
 const { products, users, restos } = require("../../models");
 const db = require("../database/connection");
-const { cloudinary } = require("../middleware/couldinary");
 const { deleteImg } = require("../utils/cloudinary/deleteImg");
 
 exports.getProducts = async (req, res) => {
