@@ -18,24 +18,32 @@ exports.register = async (req, res) => {
     image: joi.string().optional(),
   });
   const { error } = schema.validate(req.body);
-  if (error) {
+
+  // Validation err send to frontend
+  if (error)
     return res.status(401).send({
-      err: error.details[0].message,
+      status: "failed",
+      message: error.details[0].message,
     });
-  }
+
   try {
-    const { email } = req.body;
+    // Second validation
+    let { email } = req.body;
+    email = email.toLowerCase();
+
     const isUser = await users.findOne({
       where: { email },
     });
 
+    console.log(isUser);
     if (isUser) {
-      return res.status(201).send({
+      return res.status(409).send({
         status: "failed",
-        message: "acc already exists",
+        message: "Acc already exists.",
       });
     }
 
+    // Creating acc section
     const salt = await bcrypt.genSalt(8);
     const hashPass = await bcrypt.hash(req.body.password, salt);
 
@@ -50,18 +58,19 @@ exports.register = async (req, res) => {
       image: process.env.DEFAULT_PROFILE_URL,
     });
 
-    const user = await users.findOne({
+    let user = await users.findOne({
       where: { email },
       attributes: {
         exclude: ["gender", "password", "createdAt", "updatedAt"],
       },
     });
 
-    if (!user?.id)
-      return res.status(201).send({
+    if (!user)
+      return res.status(409).send({
         status: "failed",
         message: "acc fail to create",
       });
+    user = JSON.parse(JSON.stringify(user));
 
     const userData = {
       id: user?.id,
