@@ -8,18 +8,7 @@ const port = process.env.EXPRESS_PORT || 5000;
 const cors = require("cors");
 const http = require("http");
 const httpServer = http.createServer(app);
-
 const { Server } = require("socket.io");
-const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.FE_ORIGIN,
-    // Disable this for local dev
-    credentials: true,
-    methods: ["GET", "POST"],
-  },
-});
-
-require("./src/socket")(io);
 
 app.use(express.json());
 
@@ -37,6 +26,16 @@ app.options(process.env.FE_ORIGIN, cors(corsConf));
 
 // app.use("/img", express.static("./uploads/img"));
 app.use("/api/v1/", router);
-httpServer.listen(port, () => {
+const express_server = httpServer.listen(port, () => {
   console.info(`listen  ${httpServer.address().address}${port}`);
 });
+
+const io = new Server(express_server, {
+  cors: {
+    origin: process.env.FE_ORIGIN,
+    // Disable this for local dev
+    credentials: true,
+    methods: ["GET", "POST"],
+  },
+});
+require("./src/socket")(io);

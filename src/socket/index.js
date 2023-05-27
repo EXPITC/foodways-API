@@ -69,7 +69,6 @@ const socketIo = (io) => {
     });
 
     socket.on("order", async (payload) => {
-      // console.log(payload);
       const id = payload;
       try {
         let data = transactions.update(
