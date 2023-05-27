@@ -30,18 +30,6 @@ const corsConf = {
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ["GET", "OPTIONS", "PATCH", "DELETE", "POST", "PUT"],
-  allowedHeaders: [
-    "Authorization",
-    "X-CSRF-Token",
-    "X-Requested-With",
-    "Accept",
-    "Accept-Version",
-    "Content-Length",
-    "Content-MD5",
-    "Content-Type",
-    "Date",
-    "X-Api-Version",
-  ],
 };
 
 app.use(cors(corsConf));
