@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "api for foodways",
   "main": "index.js",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.10.0 <8"
+  },
   "scripts": {
     "start": "nodemon index.js",
     "spin": "node index.js",
