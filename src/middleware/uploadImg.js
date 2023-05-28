@@ -67,7 +67,10 @@ exports.uploadImg = (image, pass) => {
       await cloudinary.uploader
         .upload(dataURI, options)
         .then((res) => {
-          req.uploadImg = res;
+          req.uploadImg = {
+            ...res,
+            url: res.url.replace("http", "https"),
+          };
           return next();
         })
         .catch((err) => {

@@ -1,5 +1,7 @@
 "use strict";
 const { restos, products, users } = require("../../models");
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 require("dotenv").config();
 
 exports.nearResto = async (req, res) => {
