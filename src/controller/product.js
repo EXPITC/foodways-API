@@ -169,6 +169,8 @@ exports.getProduct = async (req, res) => {
       });
     }
 
+    data = JSON.parse(JSON.stringify(data));
+
     res.status(200).send({
       status: "success",
       ...data,
@@ -201,7 +203,7 @@ exports.addProduct = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(409).send({
+    res.status(500).send({
       status: "failed",
       message: "server error: " + err.message,
     });
