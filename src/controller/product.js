@@ -1,5 +1,7 @@
 const { Sequelize } = require("sequelize");
 const { products, users, restos } = require("../../models");
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 const db = require("../database/connection");
 const { deleteImg } = require("../utils/cloudinary/deleteImg");
 

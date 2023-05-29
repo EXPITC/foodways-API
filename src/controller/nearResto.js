@@ -85,7 +85,10 @@ exports.nearResto = async (req, res) => {
         response = await fetch(api_address);
         response = await response.json();
 
-        const address = response.address.road;
+        const address =
+          response?.address?.road ||
+          response?.address?.suburb ||
+          response?.address?.city_district;
 
         return {
           ...data,
