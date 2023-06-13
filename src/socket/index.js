@@ -5,18 +5,19 @@ const {
   order,
   restos,
 } = require("../../models");
+const isValidJwt = require("../utils/jwt/isValidJwt");
 const Op = require("sequelize").Op;
 // const { userCheck, admin, owner } = require("../middleware/userCheck");
-const jwt = require("jsonwebtoken");
 
 const socketIo = (io) => {
   io.use((socket, next) => {
-    if (socket.handshake.auth && socket.handshake.auth.token) {
+    if (isValidJwt(socket.handshake?.auth?.token)) {
       next();
     } else {
       next(new Error("Not Authorized"));
     }
   });
+
   io.on("connection", (socket) => {
     console.info("client connect:", socket.id);
 
