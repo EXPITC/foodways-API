@@ -1,27 +1,62 @@
-const { transactions, users, products, order, resto } = require("../../models");
+const {
+  transactions,
+  users,
+  products,
+  order,
+  restos,
+} = require("../../models");
 const Op = require("sequelize").Op;
 exports.addTransaction = async (req, res) => {
   try {
-    const thenTransaction = await transactions.findOne({
+    let data = await req.body;
+    if (!data)
+      return res.status(400).send({
+        status: "error",
+        message: "request data cannot be found.",
+      });
+    const onGoingTransaction = await transactions.findOne({
       where: {
         buyerId: req.user.id,
         status: {
           [Op.or]: ["Waiting Approve", "On The Way", "Order"],
         },
       },
+      include: {
+        model: users,
+        as: "seller",
+        attributes: {
+          exclude: ["password", "createdAt", "updatedAt"],
+        },
+        include: {
+          model: restos,
+          as: "restos",
+          attributes: {
+            exclude: ["ownerId", "createdAt", "updatedAt"],
+          },
+        },
+      },
+      order: [["createdAt", "DESC"]],
     });
-    if (thenTransaction) {
-      return res.status(201).send({
-        status: "fail",
-        message: `you still have transaction with status ${thenTransaction.status}`,
-        thenTransaction,
+    if (onGoingTransaction) {
+      // still valid
+      if (
+        onGoingTransaction.status === "Order" &&
+        onGoingTransaction.seller.id === data.sellerId
+      )
+        return res.status(201).send({
+          status: "ok",
+          message: "Still have transaction in same resto, ok to proceed",
+          onGoingTransaction,
+        });
+      // Refuse new order
+
+      return res.status(409).send({
+        status: "order not finish",
+        message: `you still have transaction with status ${onGoingTransaction.status}`,
+        onGoingTransaction,
       });
     }
-    // console.log("/////////////////////");
-    let data = await req.body;
-    // console.log(data);
-    // console.log(req.user.id);
-    // console.log("/////////////////////");
+
     let response = await transactions.create({
       sellerId: data.sellerId,
       buyerId: req.user.id,
@@ -137,7 +172,9 @@ exports.getTransactionActive = async (req, res) => {
     const thenTransaction = await transactions.findOne({
       where: {
         buyerId: req.user.id,
-        status: "Order",
+        status: {
+          [Op.or]: ["Waiting Approve", "On The Way", "Order"],
+        },
       },
     });
 
