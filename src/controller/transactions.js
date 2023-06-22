@@ -160,7 +160,7 @@ exports.getTransactionOngoin = async (req, res) => {
       status: "success",
       data: thenTransaction,
     });
-  } catch (error) {
+  } catch (err) {
     res.status(409).send({
       status: "failed",
       message: "server error: " + err.message,
@@ -182,7 +182,7 @@ exports.getTransactionActive = async (req, res) => {
       status: "success",
       data: thenTransaction,
     });
-  } catch (error) {
+  } catch (err) {
     res.status(409).send({
       status: "failed",
       message: "server error: " + err.message,
