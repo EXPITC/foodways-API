@@ -1,5 +1,5 @@
 const multer = require("multer");
-const { cloudinary } = require("./couldinary");
+const { cloudinary } = require("../utils/cloudinary/couldinary");
 require("dotenv").config();
 
 exports.uploadImg = (image, pass) => {
@@ -61,7 +61,6 @@ exports.uploadImg = (image, pass) => {
         folder: process.env.CLOUD_FOLDER,
       };
 
-      // console.log(req.file);
       const b64 = Buffer.from(req.file.buffer).toString("base64");
       const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
       await cloudinary.uploader

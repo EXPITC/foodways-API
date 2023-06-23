@@ -5,18 +5,20 @@ const {
   order,
   restos,
 } = require("../../models");
+const isValidJwt = require("../utils/jwt/isValidJwt");
+const jwt = require("jsonwebtoken");
 const Op = require("sequelize").Op;
 // const { userCheck, admin, owner } = require("../middleware/userCheck");
-const jwt = require("jsonwebtoken");
 
 const socketIo = (io) => {
   io.use((socket, next) => {
-    if (socket.handshake.auth && socket.handshake.auth.token) {
+    if (isValidJwt(socket.handshake?.auth?.token)) {
       next();
     } else {
       next(new Error("Not Authorized"));
     }
   });
+
   io.on("connection", (socket) => {
     console.info("client connect:", socket.id);
 
@@ -117,13 +119,13 @@ const socketIo = (io) => {
       }
 
       socket.leave(room);
-      io.in(room).emit("newOrder", `Leave order in ${restoId}`);
+      socket.to(room).emit("newOrder", `Leave order in ${restoId}`);
     });
 
     socket.on("newOrder", async (restoId) => {
       const room = `Order/${restoId}`;
 
-      io.in(room).emit("newOrder");
+      socket.to(room).emit("newOrder");
     });
 
     socket.on("confirm", async (transId) => {
@@ -140,11 +142,13 @@ const socketIo = (io) => {
             where: { id: transId },
           }
         );
+
         socket.emit("ConfirmData", data);
       } catch (err) {
         console.error(err.massage);
       }
     });
+
     socket.on("cancel", async (transId) => {
       try {
         let data = await transactions.update(
@@ -159,6 +163,18 @@ const socketIo = (io) => {
         console.error(err.massage);
       }
     });
+
+    // for client to get realtime data from owner
+    socket.on("subTrans", (transId) => {
+      socket.join(transId);
+    });
+
+    // for client to get realtime data from owner
+    // use in accept
+    socket.on("unsubTrans", (transId) => {
+      socket.leave(transId);
+    });
+
     socket.on("accept", async (transId) => {
       try {
         const validation = await transactions.findOne({
@@ -175,14 +191,19 @@ const socketIo = (io) => {
           }
         );
 
+        socket.to(transId).emit("confirmTransaction");
         socket.emit("acceptData", data);
       } catch (err) {
         console.error(err.massage);
       }
     });
+
     socket.on("transactions", async (_payload) => {
       try {
         const token = socket.handshake.auth.token;
+        if (!isValidJwt(token))
+          return socket.emit("transactionsData", { err: "not valid token" });
+
         const verified = jwt.verify(token, process.env.JWT_TOKEN);
 
         const data = await transactions.findAll({
