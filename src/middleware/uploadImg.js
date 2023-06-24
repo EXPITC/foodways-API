@@ -68,7 +68,9 @@ exports.uploadImg = (image, pass) => {
         .then((res) => {
           req.uploadImg = {
             ...res,
-            url: res.url.replace("http", "https"),
+            url: res.url
+              .replace("http", "https")
+              .replace("/upload", "/upload/q_auto:good"),
           };
           return next();
         })
