@@ -222,8 +222,8 @@ exports.getUserResto = async (req, res) => {
     const userData = await users.findOne({
       where: { id },
       include: {
-        model: resto,
-        as: "resto",
+        model: restos,
+        as: "restos",
         attributes: {
           exclude: ["ownerId", "createdAt", "updatedAt"],
         },
@@ -260,7 +260,7 @@ exports.getUserRestos = async (_req, res) => {
     const userData = await users.findAll({
       where: { role: "owner" },
       include: {
-        model: resto,
+        model: restos,
         as: "restos",
         attributes: {
           exclude: ["createdAt", "updatedAt"],

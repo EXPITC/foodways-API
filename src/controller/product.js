@@ -110,13 +110,13 @@ exports.getProductsRand10 = async (_req, res) => {
         let response = await fetch(api_address);
         response = await response.json();
         const address =
-          response.address.road +
+          response.address?.road +
           ", " +
-          response.address.suburb +
+          response.address?.suburb +
           ", " +
-          response.address.city_district +
+          response.address?.city_district +
           ", " +
-          response.address.city;
+          response.address?.city;
 
         return {
           ...product,

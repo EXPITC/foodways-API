@@ -6,6 +6,7 @@ const {
   restos,
 } = require("../../models");
 const Op = require("sequelize").Op;
+
 exports.addTransaction = async (req, res) => {
   try {
     let data = await req.body;
@@ -380,7 +381,7 @@ exports.getTransaction = async (req, res) => {
     const buyerId = req.user.id;
     const data = await transactions.findOne({
       where: {
-        id: id,
+        id,
         buyerId: buyerId,
       },
       include: [

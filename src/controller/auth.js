@@ -148,6 +148,7 @@ exports.login = async (req, res) => {
     let resto = userAcc?.restos;
 
     delete userAcc.password;
+    delete userAcc.restos;
 
     res.status(200).send({
       status: "login",
