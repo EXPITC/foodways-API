@@ -1,4 +1,5 @@
 const { getPublicId } = require("./getPublicId");
+const { cloudinary } = require("./couldinary");
 
 exports.deleteImg = async (url) => {
   // req.uploadImg.url
