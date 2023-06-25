@@ -10,23 +10,24 @@ router.post("/login", login);
 router.get("/login", userCheck, auth);
 // user
 const {
-  addUser,
+  // addUser,
   getUsers,
   getUser,
   updateUser,
   updateUserData,
   deleteUser,
-  getUserRestos,
+  // getUserRestos,
+  getUserResto,
   profileMe,
 } = require("../controller/user");
 
 router.get("/profile", userCheck, profileMe);
 
-router.post("/user", uploadImg("image"), addUser);
+// router.post("/user", uploadImg("image"), addUser);
 router.get("/users", getUsers);
 router.get("/user/:id", getUser);
-router.get("/user/resto/:id", getUserRestos);
-router.patch("/user", userCheck, uploadImg("image"), updateUser);
+router.get("/user/resto/:id", getUserResto);
+router.patch("/user", userCheck, uploadImg("image", true), updateUser);
 router.patch("/userData", userCheck, updateUserData);
 router.delete("/user/:id", deleteUser);
 
