@@ -26,8 +26,6 @@ const socketIo = (io) => {
       try {
         // const token = socket.handshake.auth.token;
 
-        // console.log(payload)
-
         // const verified = jwt.verify(token, process.env.JWT_TOKEN )
         // console.log('verified.id')
         // console.log(verified?.id)
@@ -70,13 +68,13 @@ const socketIo = (io) => {
       }
     });
 
-    socket.on("order", async (payload) => {
-      const id = payload;
+    socket.on("order", async (id) => {
+      if (!id) return;
       try {
-        let data = transactions.update(
+        let data = await transactions.update(
           { status: "Waiting Approve" },
           {
-            where: { id: id },
+            where: { id },
           }
         );
         socket.emit("OrderData", data);
@@ -88,6 +86,7 @@ const socketIo = (io) => {
     socket.on("joinRoomOrder", async (data) => {
       let room;
       let restoId = data?.restoId;
+      if (!restoId) return;
       if (data?.restoId) {
         room = `Order/${data?.restoId}`;
       } else {
@@ -107,6 +106,8 @@ const socketIo = (io) => {
     socket.on("leaveRoomOrder", async (data) => {
       let room = `Order/${data?.restoId}`;
       let restoId = data?.restoId;
+
+      if (!restoId) return;
 
       if (!data?.restoId) {
         const resto = await restos.findOne({
@@ -128,6 +129,7 @@ const socketIo = (io) => {
       socket.to(room).emit("newOrder");
     });
 
+    // confirm when transaction success by client
     socket.on("confirm", async (transId) => {
       try {
         const validation = await transactions.findOne({
@@ -175,6 +177,7 @@ const socketIo = (io) => {
       socket.leave(transId);
     });
 
+    // for owner
     socket.on("accept", async (transId) => {
       try {
         const validation = await transactions.findOne({
@@ -200,7 +203,8 @@ const socketIo = (io) => {
 
     socket.on("transactions", async (_payload) => {
       try {
-        const token = socket.handshake.auth.token;
+        const token =
+          socket.handshake.auth.token || socket.handshake.headers.token;
         if (!isValidJwt(token))
           return socket.emit("transactionsData", { err: "not valid token" });
 
@@ -252,7 +256,6 @@ const socketIo = (io) => {
             ["updatedAt", "DESC"],
           ],
         });
-        console.log(data);
         socket.emit("otwData", data);
       } catch (err) {
         console.error(err.massage);
