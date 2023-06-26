@@ -6,7 +6,7 @@ require("dotenv").config();
 
 exports.nearResto = async (req, res) => {
   try {
-    const data = req.body;
+    // const data = req.body;
     const { id } = req.user;
 
     const user = await users.findOne({
@@ -33,7 +33,7 @@ exports.nearResto = async (req, res) => {
         },
       });
 
-      if (!menu[0]) return [];
+      if (!menu) return [];
 
       menu = menu.map((product) => product.dataValues);
 
@@ -66,6 +66,7 @@ exports.nearResto = async (req, res) => {
 
     nearest = await Promise.all(
       nearest.map(async (data) => {
+        if (!data.resto.loc) return null;
         const restoLoc = data?.resto?.loc.split(" ");
 
         // Get resto menu
@@ -75,6 +76,9 @@ exports.nearResto = async (req, res) => {
         const direction_api = `https://api.mapbox.com/directions/v5/mapbox/driving/${userLoc[1]}%2C${userLoc[0]}%3B${restoLoc[1]}%2C${restoLoc[0]}?alternatives=false&exclude=toll%2Cferry%2Cunpaved%2Ccash_only_tolls&geometries=geojson&language=en&overview=full&steps=true&access_token=${process.env.MAPBOX_TOKEN}`;
         let response = await fetch(direction_api);
         response = await response.json();
+
+        if (response?.code === "InvalidInput")
+          throw new Error(response.message);
 
         let distance = response.routes[0].distance;
         const km = 0.001;
@@ -102,11 +106,11 @@ exports.nearResto = async (req, res) => {
     res.status(200).send({
       status: "success",
       data: {
-        nearResto: nearest,
+        nearResto: nearest.filter((el) => el !== null),
       },
     });
   } catch (err) {
-    res.status(409).send({
+    res.status(400).send({
       status: "failed",
       message: "server error: " + err.message,
     });
