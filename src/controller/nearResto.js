@@ -31,6 +31,7 @@ exports.nearResto = async (req, res) => {
         attributes: {
           exclude: ["createdAt", "updatedAt"],
         },
+        limit: 8,
       });
 
       if (!menu) return [];
